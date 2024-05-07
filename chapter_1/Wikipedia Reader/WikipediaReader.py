@@ -25,10 +25,10 @@ class WikipediaReader:
             yield from self._extract_company_symbols(respones.text)
 
 
-if __name__ == "__main__":
-    reader = WikipediaReader()
-    generator = reader.get_sp_500_companies()
-    for i, symbol in enumerate(generator):
-        print(symbol)
-        if i == 7:
-            break
+# if __name__ == "__main__":
+#     reader = WikipediaReader()
+#     generator = reader.get_sp_500_companies()
+#     for i, symbol in enumerate(generator):
+#         print(symbol)
+#         if i == 7:
+#             break
