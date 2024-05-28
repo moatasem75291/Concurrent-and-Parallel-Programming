@@ -1,5 +1,5 @@
 import threading
-import time, random
+import time, random, datetime
 import requests
 from lxml import etree
 from multiprocessing import Queue
@@ -7,22 +7,31 @@ from typing import Optional
 
 
 class YahooFinanceScheduler(threading.Thread):
-    def __init__(self, input_queue: Queue, **kwargs) -> None:
+    def __init__(self, input_queue: Queue, output_queue: Queue, **kwargs) -> None:
         super(YahooFinanceScheduler, self).__init__(**kwargs)
         self._input_queue: Queue = input_queue
+        self._output_queue = output_queue
         self.start()
 
     def run(self) -> None:
         while True:
             val: str = self._input_queue.get()
             if val == "DONE":
+                if self._output_queue is not None:
+                    self._output_queue.put("DONE")
                 break
 
             yahooFinanceWorker: YahooFinanceWorker = YahooFinanceWorker(symbol=val)
             price: Optional[str] = yahooFinanceWorker.extract_price()
-            print("{0}: {1}".format(val, price))
+            if self._output_queue is not None:
+                output_values = (
+                    val,
+                    price,
+                    datetime.datetime.now(datetime.timezone.utc),
+                )
+                self._output_queue.put(output_values)
 
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(15, 30))
 
 
 class YahooFinanceWorker:
